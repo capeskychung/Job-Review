@@ -1,0 +1,1189 @@
+概念与定义
+1.链表是线性表的一种表示方法。也就是线性表是逻辑结构，链表是物理结构。线性表是一种动态数据结构，它的表长可以变化。线性表上可以执行检索，修改操作，也可以在表中任何位置上执行插入和删除元素的操作。
+
+2.线性表有两种表示方式：顺序表和链表。顺序表是一组地址连续的存储单元一次存储线性表中的元素。逻辑上相邻的元素在物理上也相邻。链表采用的是链式存储结构，每个节点不仅包含所存元素本身的信息，还包含元素之间的逻辑关系额度信息。
+
+3.两种表示方式的优缺点：
+   
+
+优点	
+缺点
+顺序表
+访问效率高（交换，修改）
+存储空间利用率高	
+删除，添加效率低，静态分配
+链表
+动态分配，删除，增加效率高
+存储空间利用率低于顺序表，不支持随机访问
+
+4.链表分为单链表和双链表，按头部节点的有无可分为带头节点链表和无头节点链表，按是否循环可以分为循环链表和非循环链表。本次笔记中主要讲单链表（带头与不带头），双链表，循环链表。
+
+
+
+链表的操作
+1.构建
+2.添加节点
+3.删除节点
+4.查找
+5.修改
+6.逆置
+7.合并
+
+
+相关扩展
+1. 若线性表中最常见的操作是在最后一个元素之后插入一个元素和删除一个元素，则采用（D）存储方式最节省时间。（其实顺序表最节省时间）
+A 单链表  B 不带头节点的单循环链表  C 双链表  D 不带头节点且有尾指针的单循环链表 
+
+2.若某表最常用的操作是在最后一个结点之后插入一个结点或删除最后一个结点，则采用（D）存储结构最节省时间。
+A 单链表  B 给出表头指针的循环单链表 C 双链表   D 带头节点的循环双链表
+
+3.若某表最常用的操作是在最后一个结点之后插入一个结点或删除第一个结点，则采用（D）存储结构最节省时间。
+A 单链表  B 给出表头指针的循环单链表 C 双链表   D 仅有尾节点指针的单循环链表
+
+
+1. 求单链表中结点的个数
+// 求单链表中结点的个数  
+unsigned int GetListLength(ListNode * pHead)  
+{  
+    if(pHead == NULL)  
+        return 0;  
+  
+    unsigned int nLength = 0;  
+    ListNode * pCurrent = pHead;  
+    while(pCurrent != NULL)  
+    {  
+        nLength++;  
+        pCurrent = pCurrent->m_pNext;  
+    }  
+    return nLength;  
+}
+
+2. 将单链表反转
+// 反转单链表  
+ListNode * ReverseList(ListNode * pHead)  
+{  
+        // 如果链表为空或只有一个结点，无需反转，直接返回原链表头指针  
+    if(pHead == NULL || pHead->m_pNext == NULL)    
+        return pHead;  
+  
+    ListNode * pReversedHead = NULL; // 反转后的新链表头指针，初始为NULL  
+    ListNode * pCurrent = pHead;  
+    while(pCurrent != NULL)  
+    {  
+        ListNode * pTemp = pCurrent;  
+        pCurrent = pCurrent->m_pNext;  
+        pTemp->m_pNext = pReversedHead; // 将当前结点摘下，插入新链表的最前端  
+        pReversedHead = pTemp;  
+    }  
+    return pReversedHead;  
+}
+
+3. 查找单链表中的倒数第K个结点（k > 0）
+// 查找单链表中倒数第K个结点  
+ListNode * RGetKthNode(ListNode * pHead, unsigned int k) // 函数名前面的R代表反向  
+{  
+    if(k == 0 || pHead == NULL) // 这里k的计数是从1开始的，若k为0或链表为空返回NULL  
+        return NULL;  
+  
+    ListNode * pAhead = pHead;  
+    ListNode * pBehind = pHead;  
+    while(k > 1 && pAhead != NULL) // 前面的指针先走到正向第k个结点  
+    {  
+        pAhead = pAhead->m_pNext;  
+        k--;  
+    }  
+    if(k > 1)     // 结点个数小于k，返回NULL  
+        return NULL;  
+    while(pAhead->m_pNext != NULL)  // 前后两个指针一起向前走，直到前面的指针指向最后一个结点  
+    {  
+        pBehind = pBehind->m_pNext;  
+        pAhead = pAhead->m_pNext;  
+    }  
+    return pBehind;  // 后面的指针所指结点就是倒数第k个结点  
+}
+
+
+4. 查找单链表的中间结点
+// 获取单链表中间结点，若链表长度为n(n>0)，则返回第n/2+1个结点  
+ListNode * GetMiddleNode(ListNode * pHead)  
+{  
+    if(pHead == NULL || pHead->m_pNext == NULL) // 链表为空或只有一个结点，返回头指针  
+        return pHead;  
+  
+    ListNode * pAhead = pHead;  
+    ListNode * pBehind = pHead;  
+    while(pAhead->m_pNext != NULL) // 前面指针每次走两步，直到指向最后一个结点，后面指针每次走一步  
+    {  
+        pAhead = pAhead->m_pNext;  
+        pBehind = pBehind->m_pNext;  
+        if(pAhead->m_pNext != NULL)  
+            pAhead = pAhead->m_pNext;  
+    }  
+    return pBehind; // 后面的指针所指结点即为中间结点  
+}
+
+5. 从尾到头打印单链表
+// 从尾到头打印链表，使用栈  
+void RPrintList(ListNode * pHead)  
+{  
+    std::stack<ListNode *> s;  
+    ListNode * pNode = pHead;  
+    while(pNode != NULL)  
+    {  
+        s.push(pNode);  
+        pNode = pNode->m_pNext;  
+    }  
+    while(!s.empty())  
+    {  
+        pNode = s.top();  
+        printf("%d\t", pNode->m_nKey);  
+        s.pop();  
+    }  
+}
+// 从尾到头打印链表，使用递归  
+void RPrintList(ListNode * pHead)  
+{  
+    if(pHead == NULL)  
+    {  
+        return;  
+    }  
+    else  
+    {  
+        RPrintList(pHead->m_pNext);  
+        printf("%d\t", pHead->m_nKey);  
+    }  
+}
+
+6. 已知两个单链表pHead1 和pHead2 各自有序，把它们合并成一个链表依然有序
+// 合并两个有序链表  
+ListNode * MergeSortedList(ListNode * pHead1, ListNode * pHead2)  
+{  
+    if(pHead1 == NULL)  
+        return pHead2;  
+    if(pHead2 == NULL)  
+        return pHead1;  
+    ListNode * pHeadMerged = NULL;  
+    if(pHead1->m_nKey < pHead2->m_nKey)  
+    {  
+        pHeadMerged = pHead1;  
+               
+        pHead1 = pHead1->m_pNext;  
+        pHeadMerged->m_pNext = NULL;  
+
+    }  
+    else  
+    {  
+        pHeadMerged = pHead2;  
+        pHeadMerged->m_pNext = NULL;  
+        pHead2 = pHead2->m_pNext;  
+    }  
+    ListNode * pTemp = pHeadMerged;  
+    while(pHead1 != NULL && pHead2 != NULL)  
+    {  
+        if(pHead1->m_nKey < pHead2->m_nKey)  
+        {  
+            pTemp->m_pNext = pHead1;  
+            pHead1 = pHead1->m_pNext;  
+            pTemp = pTemp->m_pNext;  
+            pTemp->m_pNext = NULL;  
+        }  
+        else  
+        {  
+            pTemp->m_pNext = pHead2;  
+            pHead2 = pHead2->m_pNext;  
+            pTemp = pTemp->m_pNext;  
+            pTemp->m_pNext = NULL;  
+        }  
+    }  
+    if(pHead1 != NULL)  
+        pTemp->m_pNext = pHead1;  
+    else if(pHead2 != NULL)  
+        pTemp->m_pNext = pHead2;  
+    return pHeadMerged;  
+}
+
+ListNode * MergeSortedList(ListNode * pHead1, ListNode * pHead2)  
+{  
+    if(pHead1 == NULL)  
+        return pHead2;  
+    if(pHead2 == NULL)  
+        return pHead1;  
+    ListNode * pHeadMerged = NULL;  
+    if(pHead1->m_nKey < pHead2->m_nKey)  
+    {  
+        pHeadMerged = pHead1;  
+        pHeadMerged->m_pNext = MergeSortedList(pHead1->m_pNext, pHead2);  
+    }  
+    else  
+    {  
+        pHeadMerged = pHead2;  
+        pHeadMerged->m_pNext = MergeSortedList(pHead1, pHead2->m_pNext);  
+    }  
+    return pHeadMerged;  
+}
+
+
+7. 判断一个单链表中是否有环
+bool HasCircle(ListNode * pHead)  
+{  
+    ListNode * pFast = pHead; // 快指针每次前进两步  
+    ListNode * pSlow = pHead; // 慢指针每次前进一步  
+    while(pFast != NULL && pFast->m_pNext != NULL)  
+    {  
+        pFast = pFast->m_pNext->m_pNext;  
+        pSlow = pSlow->m_pNext;  
+        if(pSlow == pFast) // 相遇，存在环  
+            return true;  
+    }  
+    return false;  
+}
+
+8. 判断两个单链表是否相交
+思路1：
+将链表1中各结点地址存入HashTable中，
+再遍历链表2，如果有结点已经在HashTable中，则两链表相交。
+
+思路2：
+将链表1的尾结点和链表2的首结点（注意不是头结点）相连。
+再判断是否有环，如果有则两链表相交。
+
+思路3：(最简单的方法）
+判断两链表的尾结点是否为同一结点，若是，则相交。
+
+bool IsIntersected(ListNode * pHead1, ListNode * pHead2)  
+{  
+        if(pHead1 == NULL || pHead2 == NULL)  
+                return false;  
+  
+    ListNode * pTail1 = pHead1;  
+    while(pTail1->m_pNext != NULL)  
+        pTail1 = pTail1->m_pNext;  
+  
+    ListNode * pTail2 = pHead2;  
+    while(pTail2->m_pNext != NULL)  
+        pTail2 = pTail2->m_pNext;  
+    return pTail1 == pTail2;  
+}
+
+9. 求两个单链表相交的第一个节点
+对第一个链表遍历，计算长度len1，同时保存最后一个节点的地址。
+对第二个链表遍历，计算长度len2，同时检查最后一个节点是否和第一个链表的最后一个节点相同，若不相同，不相交，结束。
+两个链表均从头节点开始，假设len1大于len2，那么将第一个链表先遍历len1-len2个节点，此时两个链表当前节点到第一个相交节点的距离就相等了，然后一起向后遍历，知道两个节点的地址相同。
+ListNode* GetFirstCommonNode(ListNode * pHead1, ListNode * pHead2)  
+{  
+    if(pHead1 == NULL || pHead2 == NULL)  
+        return NULL;  
+  
+    int len1 = 1;  
+    ListNode * pTail1 = pHead1;  
+    while(pTail1->m_pNext != NULL)  
+    {  
+        pTail1 = pTail1->m_pNext;  
+        len1++;  
+    }  
+  
+    int len2 = 1;  
+    ListNode * pTail2 = pHead2;  
+    while(pTail2->m_pNext != NULL)  
+    {  
+        pTail2 = pTail2->m_pNext;  
+        len2++;  
+    }  
+  
+    if(pTail1 != pTail2) // 不相交直接返回NULL  
+        return NULL;  
+  
+    ListNode * pNode1 = pHead1;  
+    ListNode * pNode2 = pHead2;  
+        // 先对齐两个链表的当前结点，使之到尾节点的距离相等  
+    if(len1 > len2)  
+    {  
+        int k = len1 - len2;  
+        while(k--)  
+            pNode1 = pNode1->m_pNext;  
+    }  
+    else  
+    {  
+        int k = len2 - len1;  
+        while(k--)  
+            pNode2 = pNode2->m_pNext;  
+    }  
+    while(pNode1 != pNode2)  
+    {  
+        pNode1 = pNode1->m_pNext;  
+        pNode2 = pNode2->m_pNext;  
+    }  
+        return pNode1;  
+}
+
+10. 已知一个单链表中存在环，求进入环中的第一个节点
+
+ListNode* GetFirstNodeInCircle(ListNode * pHead)  
+{  
+    if(pHead == NULL || pHead->m_pNext == NULL)  
+        return NULL;  
+  
+    ListNode * pFast = pHead;  
+    ListNode * pSlow = pHead;  
+    while(pFast != NULL && pFast->m_pNext != NULL)  
+    {  
+        pSlow = pSlow->m_pNext;  
+        pFast = pFast->m_pNext->m_pNext;  
+        if(pSlow == pFast)  
+            break;  
+    }  
+    if(pFast == NULL || pFast->m_pNext == NULL)  
+        return NULL;  
+  
+    // 将环中的此节点作为假设的尾节点，将它变成两个单链表相交问题  
+    ListNode * pAssumedTail = pSlow;   
+    ListNode * pHead1 = pHead;  
+    ListNode * pHead2 = pAssumedTail->m_pNext;  
+  
+    ListNode * pNode1, * pNode2;  
+    int len1 = 1;  
+    ListNode * pNode1 = pHead1;  
+    while(pNode1 != pAssumedTail)  
+    {  
+        pNode1 = pNode1->m_pNext;  
+        len1++;  
+    }  
+      
+    int len2 = 1;  
+    ListNode * pNode2 = pHead2;  
+    while(pNode2 != pAssumedTail)  
+    {  
+        pNode2 = pNode2->m_pNext;  
+        len2++;  
+    }  
+  
+    pNode1 = pHead1;  
+    pNode2 = pHead2;  
+    // 先对齐两个链表的当前结点，使之到尾节点的距离相等  
+    if(len1 > len2)  
+    {  
+        int k = len1 - len2;  
+        while(k--)  
+            pNode1 = pNode1->m_pNext;  
+    }  
+    else  
+    {  
+        int k = len2 - len1;  
+        while(k--)  
+            pNode2 = pNode2->m_pNext;  
+    }  
+    while(pNode1 != pNode2)  
+    {  
+        pNode1 = pNode1->m_pNext;  
+        pNode2 = pNode2->m_pNext;  
+    }  
+    return pNode1;  
+}
+
+11. 给出一单链表头指针pHead和一节点指针pToBeDeleted，O(1)时间复杂度删除节点pToBeDeleted 
+
+void Delete(ListNode * pHead, ListNode * pToBeDeleted)  
+{  
+    if(pToBeDeleted == NULL)  
+        return;  
+    if(pToBeDeleted->m_pNext != NULL)  
+    {  
+        pToBeDeleted->m_nKey = pToBeDeleted->m_pNext->m_nKey; // 将下一个节点的数据复制到本节点，然后删除下一个节点  
+        ListNode * temp = pToBeDeleted->m_pNext;  
+        pToBeDeleted->m_pNext = pToBeDeleted->m_pNext->m_pNext;  
+        delete temp;  
+    }  
+    else // 要删除的是最后一个节点  
+    {  
+        if(pHead == pToBeDeleted) // 链表中只有一个节点的情况  
+        {  
+            pHead = NULL;  
+            delete pToBeDeleted;  
+        }  
+        else  
+        {  
+            ListNode * pNode = pHead;  
+            while(pNode->m_pNext != pToBeDeleted) // 找到倒数第二个节点  
+                pNode = pNode->m_pNext;  
+            pNode->m_pNext = NULL;  
+            delete pToBeDeleted;  
+        }     
+    }  
+}
+
+
+12.删除单链表中重复的元素
+思路：
+使用哈希表。
+从头扫描，将出现过的节点存入哈希表中。
+如果元素已经在哈希表中出现过则删除，没有则存入。
+
+注意：
+删除时需要知道前一节点。
+我使用的链表中存储的是char型变量，所以哈希表即为含有256个元素的数组。
+如果存储的是其他数据类型，则可以使用stl中的hash_set容器。
+// LinkTable.cpp : 定义控制台应用程序的入口点。
+//
+
+#include "stdafx.h"
+#include <iostream>
+#include <string>
+using namespace std;
+
+//链表的结构体
+struct node
+{
+char val;
+node * next;
+};
+
+//建立链表
+struct node * create( string & str_link )
+{
+int len = str_link.length();
+
+struct node * phead = new node();     //带有表头的链表，表头中不存储任何元素
+struct node * preNode = phead;
+for( int i=0; i<len; i++ )
+{
+struct node * pNode = new node();
+pNode->val = str_link[i];
+pNode->next = NULL;
+preNode->next = pNode;
+preNode = pNode;
+}
+return phead;
+}
+
+//输出链表
+void out_link( struct node * phead )
+{
+if( phead == NULL )
+return;
+struct node * pNode = phead->next;
+while( pNode )
+{
+cout <<pNode->val;
+pNode = pNode->next;
+}
+cout << endl;
+}
+
+//去掉重复元素
+void delete_repeat_element( struct node * phead )
+{
+if( !phead || !phead->next ) return;
+int * hashTable = new int[256](); //加括号是为了将hashTable中所有元素初始化为0
+struct node * pNode = phead->next;
+struct node * pPreNode = phead;
+while( pNode )
+{
+if( hashTable[pNode->val] !=0 ) //说明已经出现过，该结点要删除
+{
+pPreNode->next = pNode->next;
+delete pNode; //删除结点
+pNode = pPreNode->next;
+}
+else //没有出现过，则置出现标记
+{
+hashTable[pNode->val] = 1;
+pPreNode = pNode;
+pNode = pNode->next;
+}
+}
+delete [] hashTable;                 //释放资源
+}
+
+
+
+void test()
+{
+string str;
+cout << "Input the link table :"<<endl;
+cin >> str;
+struct node *phead = create( str );
+delete_repeat_element( phead );
+cout<< "The result is:" <<endl;
+out_link( phead );
+
+}
+
+int _tmain(int argc, _TCHAR* argv[])
+{
+test();
+return 0;
+}
+
+13用链表模拟大整数加法运算
+例如：9->9->9->NULL
++                      1->NULL
+      1->0->0->0->NULL
+// LinkTable.cpp : 定义控制台应用程序的入口点。
+//
+
+#include "stdafx.h"
+#include <iostream>
+#include <string>
+using namespace std;
+
+//链表的结构体
+struct node
+{
+    char val;
+    node * next;
+};
+
+//建立链表
+struct node * create( string & str_link )
+{
+    int len = str_link.length();
+
+    struct node * phead = new node();     //带有表头的链表，表头中不存储任何元素
+    struct node * preNode = phead;
+    for( int i=0; i<len; i++ )
+    {
+        struct node * pNode = new node();
+        pNode->val = str_link[i];
+        pNode->next = NULL;
+        preNode->next = pNode;
+        preNode = pNode;
+    }
+    return phead;
+}
+
+//输出链表
+void out_link( struct node * phead )
+{
+    if( phead == NULL )
+        return;
+    struct node * pNode = phead->next;
+    while( pNode )
+    {
+        cout <<pNode->val;
+        pNode = pNode->next;
+    }
+    cout << endl;
+}
+
+//求无表头链表的长度
+//返回-1为链表不存在
+int link_length( struct node* pNode )
+{
+    if(!pNode) return -1;
+
+    int len=0;
+    while( pNode )
+    {
+        pNode = pNode->next;
+        len++;
+    }
+    return len;
+}
+
+
+//大数相加递归算法
+//pNode1, pNode2为两个中间运算结点，但不是头结点
+struct node * add( struct node * pNode1, struct node * pNode2, int & carry )
+{
+if( !pNode1  ) return pNode2;
+if( !pNode2  ) return pNode1;
+//为了参数简洁，这里增大了计算量，可以将链表长度作为参数传进来
+int len1 = link_length( pNode1 );
+int len2 = link_length( pNode2 );
+
+
+if( len1 == len2 )
+{
+    if( len1==1 )             //递归终止条件
+    {
+        struct node * pNode = new node();
+        int sum = (pNode1->val - '0' ) + ( pNode2->val -'0');
+        carry = sum/10;
+        pNode->val = sum%10 + '0';
+        pNode->next = NULL;
+        return pNode;
+    }
+    else
+    {
+        int carry_cur=0;
+        struct node * pNode = new node();
+        struct node * pNext = add( pNode1->next, pNode2->next, carry_cur );
+    int sum = (pNode1->val - '0' ) + ( pNode2->val -'0') +             carry_cur;
+    carry = sum/10;
+    pNode->val = sum%10 + '0';
+    pNode->next = pNext;
+    return pNode;
+    }
+}
+
+if( len1>len2 )
+{
+int carry_cur=0;
+struct node * pNode = new node();
+struct node * pNext = add( pNode1->next, pNode2, carry_cur );
+int sum = (pNode1->val - '0' ) + carry_cur;
+carry = sum/10;
+pNode->val = sum%10 + '0';
+pNode->next = pNext;
+return pNode;
+}
+
+if( len1<len2 )
+{
+int carry_cur=0;
+struct node * pNode = new node();
+struct node * pNext = add( pNode1, pNode2->next, carry_cur );
+int sum = (pNode2->val - '0' ) + carry_cur;
+carry = sum/10;
+pNode->val = sum%10 + '0';
+pNode->next = pNext;
+return pNode;
+}
+
+return NULL;
+}
+
+struct node * add( struct node * phead1, struct node * phead2 )
+{
+if( !phead1 || !phead1->next ) return phead2;
+if( !phead2 || !phead2->next ) return phead1;
+
+int carry = 0;
+struct node * pNode = add( phead1->next, phead2->next, carry );
+
+if( carry > 0 )                     //有进位，则需要多一个结点
+{
+struct node * pCarry = new node();
+pCarry->val = '0' + carry;
+pCarry->next = pNode;
+pNode = pCarry;
+}
+
+struct node * phead = new node();
+phead->next = pNode;
+return phead;
+}
+
+void test()
+{
+string str;
+cout << "Input the first link:"<<endl;
+cin >> str;
+struct node *phead1 = create( str );
+cout << "Input the second link:"<<endl;
+cin >> str;
+struct node *phead2 = create( str );
+
+struct node * phead = add( phead1, phead2);
+cout<< "The result is:" <<endl;
+out_link( phead );
+
+}
+
+int _tmain(int argc, _TCHAR* argv[])
+{
+test();
+return 0;
+}
+
+14 判断单链表是否有环？如何找到环的“起始”点？如何知道环的长度？
+判断单链表是否有环？
+思路：
+快慢指针，快指针每次走两步，慢指针每次走一步。
+每次判断快指针是否到头了以及快慢指针是否指向同一元素。
+快指针走到头了，则没有环；
+如果快指针和慢指针指向同一个元素，则有环。
+ 
+如何找到环的起始点？
+思路：
+如果有环，则快慢指针一定相遇在环上。
+将环从快慢指针相遇结点剪开，则变成了两个单链表相交的问题。
+设两个单链表的长度分别为N，M，用两个指针分别指向两链表第一个结点，
+让位于长链表上的指针先走abs（N-M）步。然后一起走，相遇时则为环的起始点。
+
+如何知道环的长度？
+绕一圈即可。
+// LinkTable.cpp : 定义控制台应用程序的入口点。
+//
+
+#include "stdafx.h"
+#include <iostream>
+#include <string>
+using namespace std;
+
+//链表的结构体
+struct node
+{
+char val;
+node * next;
+};
+
+//建立链表
+struct node * create( string & str_link )
+{
+int len = str_link.length();
+
+struct node * phead = new node();     //带有表头的链表，表头中不存储任何元素
+struct node * preNode = phead;
+for( int i=0; i<len; i++ )
+{
+struct node * pNode = new node();
+pNode->val = str_link[i];
+pNode->next = NULL;
+preNode->next = pNode;
+preNode = pNode;
+}
+return phead;
+}
+
+//输出链表
+void out_link( struct node * phead )
+{
+if( phead == NULL )
+return;
+struct node * pNode = phead->next;
+while( pNode )
+{
+cout <<pNode->val;
+pNode = pNode->next;
+}
+cout << endl;
+}
+
+//找到第index个元素
+struct node * find_node(struct node* phead, int index )
+{
+if(!phead) return NULL;
+struct node * pNode = phead;
+while( index--)
+{
+pNode = pNode->next;
+if( !pNode )
+return NULL;
+}
+return pNode;
+}
+
+
+
+//检查链表有无环
+//有，则返回快慢指针共同指向的点
+//无，则返回空指针
+struct node * check_loop( struct node * phead )
+{
+if(!phead)
+return NULL;
+struct node * pFast = phead;
+struct node * pSlow = phead;
+
+int step = 1;
+while( pFast )
+{
+pFast = pFast->next;
+if( step++%2==0 )
+{
+pSlow = pSlow->next;
+if( pSlow == pFast )
+return pSlow;
+}
+}
+return NULL;
+}
+
+//求两个节点的距离，即中间有多少个连线
+//返回-1为出错，如果是同一节点，则返回0
+int find_length( struct node* pNode1, struct node* pNode2 )
+{
+if(!pNode1||!pNode2) return -1;
+
+int len=0;
+while( pNode1 )
+{
+if( pNode1 == pNode2 )
+return len;
+pNode1 = pNode1->next;
+len++;
+}
+return -1;
+}
+
+//找环的起始点,pTail为快慢指针共同指向的节点
+struct node * loop_first_node( struct node * phead, struct node * pTail )
+{
+if( !phead || !pTail ) return NULL;
+struct node * pNode1 = pTail->next;
+struct node * pNode2 = phead->next;
+int M = find_length( pNode1, pTail );
+int N = find_length( pNode2, pTail );
+
+if( M > N )
+{
+int step = M-N;
+while(step--)
+pNode1 = pNode1->next;
+}
+if( N > M )
+{
+int step = N-M;
+while(step--)
+pNode2 = pNode2->next;
+}
+while(pNode1&&pNode2)
+{
+if(pNode1 == pNode2 )
+return pNode1;
+pNode1 = pNode1->next;
+pNode2 = pNode2->next;
+}
+return NULL;
+}
+
+void test()
+{
+string str;
+cin >> str;
+struct node *phead = create( str );
+int index;
+cin >> index;
+struct node * pNode1 = find_node( phead, index );
+struct node * pNode = phead;
+while( pNode->next )
+pNode = pNode->next;
+pNode->next = pNode1;        //生成有环链表, 注释掉之一行则为无环链表
+struct node * pTail = check_loop( phead );
+struct node * pFirstLoopNode = NULL;
+if( pTail )
+{
+cout <<"The link has loop." <<endl;
+pFirstLoopNode = loop_first_node(phead, pTail);
+cout <<"First Loop Node is: " << pFirstLoopNode->val <<endl;
+cout <<"The number of node in loop is: " << find_length( pTail->next, pTail)+1 <<endl;
+}
+else
+cout << "The link table has no loop." <<endl;
+
+}
+
+int _tmain(int argc, _TCHAR* argv[])
+{
+test();
+return 0;
+}
+
+15.单链表交换任意两个元素（不包括表头）
+思路：
+有两种情况，相邻和不相邻。
+首先找两个节点的前驱，可以通过前驱来判断是否相邻。
+相邻则改变3个结点的next指针，不相邻则改变4个结点的next指针。
+ 
+注意：
+要判断许多出错的情况，比如，结点不在表中，结点为空，表为空等。
+// LinkTable.cpp : 定义控制台应用程序的入口点。
+//
+
+#include "stdafx.h"
+#include <iostream>
+#include <string>
+using namespace std;
+
+//链表的结构体
+struct node
+{
+char val;
+node * next;
+};
+
+//建立链表
+struct node * create( string & str_link )
+{
+int len = str_link.length();
+
+struct node * phead = new node();     //带有表头的链表，表头中不存储任何元素
+struct node * preNode = phead;
+for( int i=0; i<len; i++ )
+{
+struct node * pNode = new node();
+pNode->val = str_link[i];
+pNode->next = NULL;
+preNode->next = pNode;
+preNode = pNode;
+}
+return phead;
+}
+
+//输出链表
+void out_link( struct node * phead )
+{
+if( phead == NULL )
+return;
+struct node * pNode = phead->next;
+while( pNode )
+{
+cout <<pNode->val;
+pNode = pNode->next;
+}
+cout << endl;
+}
+
+//找到第index个元素
+struct node * find_node(struct node* phead, int index )
+{
+if(!phead) return NULL;
+struct node * pNode = phead;
+while( index--)
+{
+pNode = pNode->next;
+if( !pNode )
+return NULL;
+}
+return pNode;
+}
+
+//找前驱节点
+struct node* find_preNode( struct node* phead, struct node* pNode)
+{
+if( !pNode ) return NULL;
+struct node* preNode = phead;
+while( preNode )
+{
+if( preNode->next == pNode )
+return preNode;
+preNode = preNode->next;
+}
+return NULL;
+}
+
+//交换节点
+void exchange_node( struct node* phead, struct node* pNode1, struct node* pNode2)
+{
+if( !phead ) return;
+//分别找到pNode1的前驱pPre1,和pNode2的前驱pPre2
+struct node* pPre1 = find_preNode( phead, pNode1);
+struct node* pPre2 = find_preNode( phead, pNode2);
+if( !pPre1 || !pPre2 ) return;  //有任何一个没有找到
+
+//相邻的情况
+struct node *pBefore, *pAfter, *pPre;
+if( pPre2 == pNode1 )
+{
+pBefore = pNode1;
+pAfter = pNode2;
+pPre = pPre1;
+}
+if( pPre1 == pNode2)
+{
+pBefore = pNode2;
+pAfter = pNode1;
+pPre = pPre2;
+}
+if( pPre2 == pNode1 || pPre1 == pNode2 )
+{
+pPre->next = pAfter;
+pBefore->next = pAfter->next;
+pAfter->next = pBefore;
+}
+else
+{
+//不相邻的情况
+struct node *pNext1 = pNode1->next;
+pNode1->next = pNode2->next;
+pPre1->next = pNode2;
+pPre2->next = pNode1;
+pNode2->next = pNext1;
+}
+
+}
+
+void test()
+{
+string str;
+cin >> str;
+struct node *phead = create( str );
+int index;
+cin >> index;
+struct node * pNode1 = find_node( phead, index );
+cin >> index;
+struct node * pNode2 = find_node( phead, index );
+exchange_node( phead, pNode1, pNode2 );
+cout << "after exchange: "<<endl;
+out_link( phead );
+
+}
+
+int _tmain(int argc, _TCHAR* argv[])
+{
+test();
+return 0;
+}
+
+15 常数时间内删除单链表中某结点 
+问题：
+一个单链表，很长，遍历一遍很慢，我们仅知道一个指向某节点的指针pNode，而我们又想删除这个节点。
+
+思路：
+将该结点的下一个结点的内容拷贝到当前结点，然后删除下一个结点。
+如果该结点时最后一个结点，则必须遍历一遍单链表，找到前面一个结点，然后删掉该结点。
+
+注意：
+虽然最后一种情况是线性复杂度的，但是总体上来看还是常数时间的。
+// LinkTable.cpp : 定义控制台应用程序的入口点。
+//
+
+#include "stdafx.h"
+#include <iostream>
+#include <string>
+using namespace std;
+
+//链表的结构体
+struct node
+{
+char val;
+node * next;
+};
+
+//2，找第4个结点
+struct node * create( string & str_link )
+{
+int len = str_link.length();
+
+struct node * phead = new node();     //带有表头的链表，表头中不存储任何元素
+struct node * preNode = phead;
+for( int i=0; i<len; i++ )
+{
+struct node * pNode = new node();
+pNode->val = str_link[i];
+pNode->next = NULL;
+preNode->next = pNode;
+preNode = pNode;
+}
+return phead;
+}
+
+void out_link( struct node * phead )
+{
+if( phead == NULL )
+return;
+struct node * pNode = phead->next;
+while( pNode )
+{
+cout <<pNode->val;
+pNode = pNode->next;
+}
+cout << endl;
+}
+
+struct node * find_third_node( struct node * phead )
+{
+if( !phead ) return NULL;
+
+//快指针先走4步
+struct node *pFast = phead;
+struct node *pSlow = phead;
+int num =4;
+while(num--)
+{
+pFast = pFast->next;
+if(!pFast)    //还没走完就没了
+{
+return NULL;
+break;
+}
+}
+
+//快慢指针一起走
+while(pFast)
+{
+pFast = pFast->next;
+pSlow = pSlow->next;
+}
+
+return pSlow;
+}
+
+struct node * find_last_node( struct node * phead )
+{
+struct node *pNode = phead;
+while(pNode->next)
+{
+pNode = pNode->next;
+}
+return pNode;
+}
+
+void delete_node( struct node * phead, struct node * pNode )
+{
+if( !phead ) return;
+
+//如果pNode是最后一个结点，则找到前面一个结点
+if( !pNode->next )
+{
+struct node *preNode = phead;
+while(phead)
+{
+if(preNode->next==pNode)
+break;
+else
+preNode = preNode->next;
+}
+if( !preNode )
+{
+cout <<"The node is not in the link list" << endl;
+return;
+}
+preNode->next = NULL;
+delete pNode;
+}
+else          //否则拷贝下一个元素的内容，并删除下一个结点
+{
+struct node * pNext = pNode->next;
+pNode->val = pNext->val;
+pNode->next = pNext->next;
+delete pNext;
+}
+}
+
+void test()
+{
+string str;
+cin >> str;
+struct node *phead = create( str );
+cout << "The Link is : ";
+out_link( phead );
+struct node *pNode = find_third_node(phead);
+delete_node( phead, pNode );
+cout << "delete the last third node:" <<endl;
+out_link( phead );
+pNode = find_last_node(phead);
+delete_node( phead, pNode );
+cout << "delete last node: "<<endl;
+out_link( phead );
+
+}
+
+int _tmain(int argc, _TCHAR* argv[])
+{
+test();
+return 0;
+}
+
+
+
+注意：
+单循环链表设置尾指针比设置头指针要好。
+总结：
+1，使用指针时，一定要检查指针是否为空；
+2，要考虑特殊情况，如指针为空，空链表（只有表头结点），只有一个结点等；
+3，插入，删除，交换等操作时都需要使用当前结点的前驱，需要同时记录下来；
+4，单链表有无环以及交叉链表求相交结点的两个题目有很大的联系，
+也是经常考的题目，有些题目可以转化成这类题目；
+5，递归思想很重要，在链表的倒序输出，反转，模拟大数相交，
+快速排序中都有用到，分治算法往往需要用递归来做；
+6，快慢指针的思想很重要，常数时间删除结点的算法也很考察智力。
+
+参考：
+http://blog.csdn.net/huangxy10/article/category/1244320 
+
+http://www.cnblogs.com/lixiaohui-ambition/archive/2012/09/25/2703195.html 
+
+
+
