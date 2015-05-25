@@ -1,0 +1,44 @@
+Sql的动词
+SQL功能
+动词
+数据查询	SELECT
+数据定义	CREATE，DROP，ALTER
+数据操纵	INSERT，UPDATE，DELETE
+数据控制	GRANT,REVOKE
+
+
+数据定义
+SQL的数据定义语句
+操作对象	创建	删除	修改
+模式	CREATE SCHEMA	DROP SCHEMA	
+表	CREATE TABLE	DROP TABLE	ALTER TABLE
+视图	CREATE VIEW	DROP VIEW	
+索引	CREATE INDEX	DROP INDEX	
+
+模式定义与删除
+在SQL中，模式定义语句如下：
+CREATE SCHEMA <模式名> AUTHORIZATION <用户名>
+CREATE SCHEMA (模式名）AUTHORIZATION（用户名）中的用户名指的是将拥有该模式的用户名．如果省略，缺省为执行该命令的用户名． 只有超级用户才能创建不属于自己的模式．另外，CREATE SCHEMA 可以包括在新模式中 创建对象的子命令．这些子命令和那些在创建完模式后发出的命令没有 任何区别，只不过是如果使用了 AUTHORIZATION 子句， 那么所有创建的对象都将被该用户拥有．
+
+如果没有指定模式名，那么<模式名>隐含为<用户名>。要创建模式。调用该命令的用户必须具有DBA权限，或者获得了DBA授予的CREATE SCHEMA权限。
+定义模式实际上定义了一个命名空间，在这个空间中可以进一步定义该模式包含的数据库对象，例如基本表，视图，索引等。
+在CREATE SCHEMA中可以接受CREATE TABLE，CREATE VIEW和GRANT子句。也就是说用户可以在创建模式的同时在这个模式定义中进一步创建基本表，视图，定义授权。
+
+CREATE SCHEMA <模式名> AUTHORIZATION <用户名>[ <表定义子句>| <视图定义子句>|<授权定义子句>]
+例子：
+CREATE SCHEMA TEST AUTHORIZATION ZHANG
+          CREATE TABLE TAB1(COL1 SMALLINT,
+                                           COL2 INT
+                                            );
+删除模式
+在SQL中删除模式语句如下：
+DROP SCHEMA <模式名> <CASCADE | RESTRICT >
+其中CASCADE和RESTRICT两者必选其一。
+
+选择了CASCADE(级联)，表示在删除模式的同时把该模式中的所有数据对象全部一起删除
+选择了RESTRICT(限制)，表示如果该模式中已经定义了下属的数据库对象（如表，视图等），则拒绝该删除语句的执行。只有当该模式中没有任何下属的对象时才能执行DROP SCHEMA语句。
+
+
+例子：
+DROP SCHEMA ZHANG CASCADE
+该语句删除了模式ZHANG，同时该模式中已经定义的表TAB1也被删除了。
