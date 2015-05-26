@@ -1,0 +1,94 @@
+定义基本表
+创建了一个模式，就建立了一个数据库的命名空间，一个框架。在这个空间中首先要定义的是该模式包含的数据库基本表。SQL语言使用CREATE TABLE语句来定义基本表，其基本格式如下：
+CREATE TABLE <表名>（<列名> <数据类型>[列级完整性约束条件]
+[,<列名> <数据结构>[列级完整性约束条件]]
+...
+,[表级完整性约束条件]）；
+
+建表的同时通常还可以定义与该表有关的完整性约束条件，这些完整性约束条件被存入系统的数据字典中，当用户操作表中数据时由RDBMS自动检查该操作是否违背这些完整性约束条件。如果完整性约束条件涉及到该表的多个属性列，则必须定义在表级上，否则既可以定义在列级也可以定义在表级。
+
+例子：
+建立一个‘学生’表Student
+CREATE TABLE Student
+(
+Sno CHAR(9) PRIMARY KEY,
+ Sname CHAR(20) UNIQUE,
+ Ssex char(2)
+ Sage SMALLINT,
+ Sdept CHAR(20)
+);
+
+建立一个“课程”表Course.
+CREATE TABLE Course
+(
+Cno CHAR(4) PRIMARY KEY,
+Cname CHAR(40),
+Cpno CHAR(4),
+Ccredit SMALLINT,
+FOREIGN KEY Cpno REFERENCES Course(Cno)
+/*表级完整性约束条件，Cpno是外码，被参照表示Course，被参照列是Cno*/
+);
+ 建立学生选课表SC
+CREATE TABLE SC
+(
+Sno CHAR(9),
+Cno CHAR(4),
+Grade SMALLINT,
+PRIMARY KEY(Sno,Cno),
+/*主码由两个属性构成，必须作为表级完整性进行定义*/
+FOREIGN KEY (Sno) REFERENCES Student(Sno),
+/*表级完整性约束条件，Sno是外码，被参考表示Student*/
+FOREIGN KEY (Cno) REFERENCES Course(Cno) 
+/*表级完整性约束条件，Cno是外码，被参考表示Course*/
+);
+
+数据类型
+数据类型	定义
+CHAR(n)	长度为n的定长字符串
+VARCHAR(n)	最大长度为n的变长字符串
+INT	长整数（也可以写作INTEGER）
+SMALLINT	短整数
+NUMERIC(P,D)	定点数，由p位数字（不包括符号，小数点）组成，小数后面有d位数字
+REAL	取决于机器精度的浮点数
+Double precision	取决于机器精度的双精度浮点数
+FLOAT(n)	浮点数，精度至少为n位数字
+DATE	日期，包含年月日，格式为YYYY-MM-DD
+TIME	时间，包含一日的时分秒，格式为HH:MM:SS
+
+
+
+模式与表
+每一个基本表都属于某一个模式，一个模式包含多个基础表。当定义基本表时如何定义它所属的模式呢。三种方法：
+1）在表中明显地给出模式名
+CREATE TABLE “S-T”.Student
+2）在创建模式语句中同时创建表。
+3)设置所属的模式，这样在创建表时表名中不必给出模式
+当用户创建基本表的时候若没有指定模式，系统根据搜索路径来确定该对象所属的模式
+SHOW search_path; 可以显示当前路径.搜索路径的当前默认值是：$user,PUBLIC.其含义是首先搜索与用户名相同的模式名如果该模式不存在，则使用PUBLIC模式。
+DBA用户也可以设置搜索路径，例如：
+SET search_path TO "S-T",PUBLIC
+然后再定义基本表，这样基本表所属的模式就该模式。
+
+
+修改基本表
+SQL语言使用ALTER TABLE语句修改基本表，其一般格式为：
+ALTER TABLE <表名>
+[ADD <新列名> <数据类型>[完整性约束]]   /*添加列*/
+[DROP <完整性约束名>]
+[ALTER COLUMN <列名><数据类型>];
+
+ADD子句用于增加新列和新的完整性约束条件，DROP子句用于删除指定的完整性约束条件，ALTER COLUMN子句用于修改原有的列定义，包括修改列名和数据类型。
+
+例子：向Student表添加“入学时间”列，其数据类型为日期型。
+ALTER TABLE Student ADD S_entrance DATE;
+将年龄的数据类型由字符型改为整型
+ALTER TABLE Student ALTER COLUMN Sage INT;
+增加课程名必须取唯一值得约束条件
+ALTER TABLE Course ADD UNIQUE(Cname);
+
+
+删除基本表
+当某个基本表不再需要时，可以使用DROP TABLE 语句删除它。其一般格式为：
+DROP TABLE  <表名> [RESTRICT | CASCADE];
+若选择RESTRICT：则该表的删除是有限制条件的。欲删除的基本表不能被其他表的约束所引用（如CHECK，FOREIGN KEY等约束），不能有视图，不能有触发器，不能有存储过程或函数等。如果存在这些依赖该表的对象，则此表不能被删除。
+若选择CASCADE：该表删除的时候没有限制条件。再删除基本表的同时，相关依赖对象，例如视图，都将被遗弃一起删除。
