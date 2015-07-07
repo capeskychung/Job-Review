@@ -1,0 +1,133 @@
+SQL提供了SELECT语句进行数据库的查询，该语句具有灵活的使用方式和丰富的功能。其一般格式为：
+SELECT [ALL | DISTINCT] <目标列表达式>[,<目标列表达式>]...
+FROM <表名或视图名>[,<表名或试图名>]...
+[WHERE <条件表达式>]
+[GROUP BY<列名1> [HAVING <条件表达式>]]
+[ORDER BY<列名2>[ASC | DESC]]
+
+整个SELECT语句含义是，根据WHERE子句的表达式，从FROM子句指定的基本表或视图中找出满足条件的元组，再按SELECT子句中的目标列表达式，选出元祖中的属性值形成结果表。
+如果有GROUP BY子句，则将结果按<列名1>的值进行分组，该属性列值相等的元组为一个组。通常会在每组中作用聚集函数。如果GROUP BY子句带HAVING 短语，则只有满足条件的组才予以输出。
+如果有ORDER BY子句，则结果表还按<列名2>的值的升序或降序排序。
+
+单表查询
+一.选择若干项
+选择表中的全部列或者部分列，这就是关系代数的投影运算。
+1.查询指定列
+在很多情况下，用户只对表中的一部分属性列感兴趣，这时可以通过SELECT子句的<目标列表达式>中指定要查询的属性列。
+SELECT Sname,Sno,Sdept
+FROM Student;
+<目标列表达式>中各个列的先后顺序可以与表中的顺序不一致。用户可以根据应用的改变列的显示顺序。
+2.查询全部列
+将表中的所有属性列都选出来，可以有两种方法。一种方法就是在SELECT关键字后面列出所有的列名。如果列的显示顺序与其在基表中的顺序相同，也可以简单地将<目标列表达式>指定为*.
+
+SELECT * FROM Student;
+
+3查询经过计算的值
+SELECT子句的<目标列表达式>不仅可以是表中的属性列，也可以是表达式。
+SELECT Sname,2015-Sage
+FROM Student;
+<目标列表达式>不仅可以是算术表达式，还可以是字符串常量，函数等。
+用户可以通过指定别名来改变查询结果的列标题，这对于含算术表达式，常量，函数名的目标列表达式尤为有用。
+SELECT Sname NAME, 'Year of Birth:'BIRTH,2004-Sage BIRTHDAY,LOWER(Sdept)DEPARTMENT
+FROM Student;
+
+二.选择表中的若干元组
+1.消除取值重复的行
+两个原本并不完全相同的元组，投影到指定的某些列上后，可能变成相同的行了，可以用DISTINCT取消他们。
+SELECT DISTINCT Sno FROM SC;
+如果没有指定DISTINCT关键词，则缺省为ALL，即保留结果表中取值重复的行。
+2.查询满足条件的元组
+查询满足条件的元祖可以通过WHERE子句实现。WHERE子句常用的查询条件
+查询条件	谓词
+比较	=,>,<,>=,<=,!=,<>,!>,!<;NOT上述比较运算符
+确定范围	BETWEEN AND,NOT BETWEEN AND
+确定集合	IN,NOT IN
+字符匹配	LIKE,NOT LIKE
+空值	IS NULL, IS NOT NULL
+多重条件（逻辑运算）	AND,OR,NOT
+1)比较大小
+用于进行比较的运算符一般包括：
+=（等于），>（大于），<（小于）,>=（大于等于）, <=（小于等于）,!=或<>（不等于），!>（不大于），!<（不小于）。
+2）确定范围
+谓词BETWEEN AND和NOT BETWEEN AND可以用来查找属性值在（或不在）指定范围内的元组，其中BETWEEN后是范围的下限（即低值），AND后是范围上的上限（即高值）。
+查询年龄在20~23岁（包括20岁和23岁）之间的学生的姓名，系别和年龄。
+SELECT Sname,Sdept,Sage
+FROM Student
+WHERE Sage BETWEEN 20 AND 23;
+
+3)确定集合
+谓词IN可以用来查找属性值属于指定集合的元组。
+查询计算机科学系（CS），数学系（MA）和信息系（IS）学生的姓名和性别
+SELECT Sname,Ssex
+FROM Student
+WHERE Sdept IN ('CS','MA','IS');
+与IN相对应的谓词NOT IN，用于查找属性值不属于指定集合的元组。
+
+4）字符匹配
+谓词LIKE可以用来进行字符串的匹配。其一般语法格式如下：
+[NOT] LIKE '<匹配串>'[ESCAPE '<换码字符>']
+其含义是查找指定的属性列值与<匹配值>相匹配的元组。<匹配串>可以是一个完整的字符串，也可以含有通配符%和_。其中：   
+%(百分号)代表任意长度（长度可以为0）的字符串。例如a%b表示以a开头，以b结尾的任意长度的字符串。如acb，addgb等都满足该匹配串。
+_（下划线）代表任意单个字符。例如a_b表示以a开头，以b结尾的长度为3的任意字符串。
+查询学号为200215121的学生的详细情况。
+SELECT * FROM Student WHERE Sno LIKE '200215121'
+如果LIKE后面的匹配串不含通配符，则可以用=运算符取代LIKE谓词，用！=或<>运算符取代NOT LIKE谓词。
+
+查询所有姓刘的学生的姓名，学号和性别。
+SELECT Sname,Sno,Ssex
+FROM Student
+WHERE Sname LIKE '刘%';
+
+查询姓欧阳且全名为3个汉字的学生的姓名。
+SELECT Sname FROM Student WHERE Sname LIKE '欧阳__';
+如果用户要查询的字符串本身就含有通配符%或_，这时就要使用ESCAPE'<换码字符>'短语，对通配字符进行转义。
+查询DB_Design课程的课程号和学分。
+SELECT Cno,Ccredit
+FROM Course
+WHERE Cname LIKE 'DB\_Design' ESCAPE '\';
+ESCAPE '\'表示'\'为换码字符这样匹配串种紧跟在‘\’后面的字符'_'不再具有通配符的含义，转义为普通的“_”字符。
+
+
+5）涉及空值的查询
+查询所有有成绩的学生学号和课程号
+SELECT Sno,Cno FROM SC WHERE Grade IS NULL;
+6)多重条件查询
+逻辑运算符AND和OR可用来连接多个查询条件。AND的优先级高于OR，但用户可以用括号改变优先级
+查询计算机科学系年龄在20岁以下的学生姓名。
+SELECT Sname FROM Student
+WHERE Sdept='CS' AND Sage<20;
+
+三 ORDER BY子句
+用户可以通过ORDER BY子句对查询结果按照一个或多个属性列的升序（ASC）或降序（DESC）排列，缺省值为升序。
+
+查询选修了3号课程的学生学号及其成绩，查询结果按分数的降序排列。
+SELECT Sno,Grade FROM SC WHERE Cno='3' ORDER BY Grade DESC;
+对于空值若按升序排，含空值的元组将最后显示。若按降序排，空值的元组将最先显示。
+
+
+四 聚集函数
+为了进一步方便用户，增强检索功能，SQL提供了许多聚集函数，主要有：
+COUNT( [ DISTINCT | ALL ]  *)                  统计元组个数
+COUNT( [ DISTINCT | ALL] <列名> )         统计一列中值得个数
+SUM( [ DISTINCT | ALL ] <列名> )            计算一列值得总和 （此列必须是数值型）
+AVG( [ DISTINCT | ALL ] <列名> )             计算一列值得平均值（此列必须是数值型）
+MAX( [ DISTINCT | ALL ] <列名> )             求一列中的最大值
+MIN( [ DISTINCT | ALL ] <列名> )               求一列中的最小值
+如果指定DISTINCT短语，则表示在计算时要取消指定列中的重复值。如果不指定DISTINCT短语或指定ALL短语（ALL为缺省值），表示不取消重复值。
+查询选修了课程的学生人数
+SELECT COUNT(DISTINCT Sno) FROM SC
+
+
+五 GROUP BY子句
+GROUP BY子句将查询的结果按某一列或多列的值分组，值相等的为一组。对查询结果分组的目的是为了细化聚集函数的作用对象。如果未对查询结果分组，聚集函数将作用于整个查询结果。分组后聚集函数将作用于每一个组，即每一组都有一个函数值。   
+求各个课程号及相应的选课人数。
+SELECT Cno,COUNT(Sno)
+FROM SC
+GROUP BY Cno;
+
+查询选修了3们课以上课程的学生学号
+SELECT Sno
+FROM SC
+GROUP BY Sno
+HAVING COUNT(*)>3;
+这里先用GROUP BY子句按Sno分组，再用聚集函数COUNT对每一组计数。HAVING短语给出了选择组的条件。WHERE子句与HAVING短语的区别在于作用对象不同。WHERE子句作用于基本表或视图，从中选择满足条件的元组。HAVING短语作用于组，从中选择满足条件的组。
